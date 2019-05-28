@@ -24,11 +24,13 @@ func main() {
    port := os.Getenv("PORT")
    if port == "" { port = "80" }
 
-   qrcode, err := qrcodeGeneratorService.NewQRCodeGenerator("./tmp")
+   qrcode, err := qrcodeGeneratorService.NewQRCodeGenerator("./tmp/")
    if err != nil { return }
 
    // API
    router := mux.NewRouter()
+   router.HandleFunc("/generateQRCode", qrcode.QRCodeImage).Methods("GET")
+   router.HandleFunc("/generateQRCodeAndDownload", qrcode.DownloadQRCode).Methods("GET")
    router.HandleFunc("/healthz", qrcode.Healthz).Methods("GET")
 
    interrupt := make(chan os.Signal, 1)
