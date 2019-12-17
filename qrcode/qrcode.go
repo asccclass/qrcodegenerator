@@ -7,9 +7,11 @@ import(
    "image/color"
    "strconv"
    "io/ioutil"
+   "encoding/base64"
    "net/http"
    qrcode "github.com/skip2/go-qrcode"
    log "github.com/sirupsen/logrus"
+   "github.com/gorilla/mux"
    // "encoding/json"
 )
 
@@ -44,9 +46,22 @@ func (qrg *QRCodeGenerator) createPNGImage(qrcodeurl string) ([]byte, error) {
    return png, nil
 }
 
+// 輸出web error
+func(qrg *QRCodeGenerator) Error2Web(w http.ResponseWriter, err error) {
+   w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+   w.WriteHeader(http.StatusOK)
+   fmt.Fprintf(w, "{\"errMsg\": \"%s(server)\"}", err.Error())
+}
+
 // Write file to client for download
-func (qrg *QRCodeGenerator) QRCodeImage(w http.ResponseWriter, r *http.Request) {
-   png, err := qrg.createPNGImage("https://www.justdrink.com.tw/")
+func(qrg *QRCodeGenerator) QRCodeImage(w http.ResponseWriter, r *http.Request) {
+   urlParams := mux.Vars(r)
+   if urlParams["params"] == "" {
+      qrg.Error2Web(w, fmt.Errorf("Params Error.'%s'", urlParams["params"]))
+      return
+   }
+   str, _ := base64.StdEncoding.DecodeString(urlParams["params"])
+   png, err := qrg.createPNGImage(string(str))
    if err != nil {
       fmt.Fprintf(w, "Something error:%v", err)
       

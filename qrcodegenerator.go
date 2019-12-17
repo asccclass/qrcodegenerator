@@ -29,7 +29,7 @@ func main() {
 
    // API
    router := mux.NewRouter()
-   router.HandleFunc("/generateQRCode", qrcode.QRCodeImage).Methods("GET")
+   router.HandleFunc("/generateQRCode/{params}", qrcode.QRCodeImage).Methods("GET")
    router.HandleFunc("/generateQRCodeAndDownload", qrcode.DownloadQRCode).Methods("GET")
    router.HandleFunc("/healthz", qrcode.Healthz).Methods("GET")
 
