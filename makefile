@@ -21,9 +21,12 @@ run: docker
 	docker run --rm -d --name ${ContainerName} -v /etc/localtime:/etc/localtime:ro \
 	-v ${CURDIR}/tmp:/app/tmp \
 	--env-file ./envfile -p ${PORT}:80 ${ImageName}
+	make log
 	
 stop:
 	docker stop ${ContainerName}
 	
 log:
 	docker logs -f -t --tail 20 ${ContainerName}
+
+re:stop run
