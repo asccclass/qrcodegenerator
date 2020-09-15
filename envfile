@@ -1,0 +1,14 @@
+SystemName=StaticFileServer
+DBMSType=MySQL
+DBSERVER=MySQLx
+DBNAME=bots
+DBLOGIN=root
+DBPASSWORD=webteam@2019
+
+GEOLocationAPI=https://freegeoip.app/
+
+DocumentRoot=www
+ErrorLineNotifyToken=fD4Dj6x2Ujjjt8IPWwsXtlf5GAKbaNkYuicxS13e4lL
+ErrorLineNotifyURL=https://notify-api.line.me/api/notify
+
+QRCodePath=/app/tmp
