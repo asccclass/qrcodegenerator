@@ -1,61 +1,28 @@
 package main
 
 import(
-   "time"
-   "net/http"
    "os"
-   "os/signal"
-   "syscall"
-   "context"
-   log "github.com/sirupsen/logrus"
-   "github.com/gorilla/mux"
-   "github.com/asccclass/qrcodegenerator/qrcode"
+   "github.com/asccclass/staticfileserver"
 )
 
 func main() {
-   var err error
-   defer func() {
-      if err != nil {
-         log.Printf("error in myHandler - error: %v", err)
-         // w.WriteHeader(http.StatusInternalServerErrror)  // for web clien
-      }
-   }()
-
    port := os.Getenv("PORT")
    if port == "" { port = "80" }
 
-   qrcode, err := qrcodeGeneratorService.NewQRCodeGenerator("./tmp/")
-   if err != nil { return }
-
-   // API
-   router := mux.NewRouter()
-   router.HandleFunc("/generateQRCode/{params}", qrcode.QRCodeImage).Methods("GET")
-   router.HandleFunc("/generateQRCodeAndDownload", qrcode.DownloadQRCode).Methods("GET")
-   router.HandleFunc("/healthz", qrcode.Healthz).Methods("GET")
-
-   interrupt := make(chan os.Signal, 1)
-   signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
-
-   srv := &http.Server{
-      Addr:    ":" + port,
-      Handler: router,
-      WriteTimeout: 15 * time.Second,
-      ReadTimeout:  15 * time.Second,
+   documentRoot := os.Getenv("DocumentRoot")
+   if documentRoot == "" {
+      documentRoot = "www/html"
+   }
+   templateRoot := os.Getenv("TemplateRoot")
+   if templateRoot == "" {
+      templateRoot = "www/template"
    }
 
-   log.Println("Server running at " + port)
-   go func() {
-      if err := srv.ListenAndServe(); err != nil {
-         log.Printf("listen Error %v\n", err)
-      }
-   }()
-
-   c := make(chan os.Signal, 1)
-   signal.Notify(c, os.Interrupt)
-   <-c
-   ctx, cancel := context.WithTimeout(context.Background(), time.Second * 15)
-   defer cancel()
-   srv.Shutdown(ctx)
-   log.Println("\nshutting down...")
-   os.Exit(0)
+   server, err := SherryServer.NewServer(":" + port, documentRoot, templateRoot)
+   if err != nil {
+      panic(err)
+   }
+   // if you have your own router add this and implement router.go
+   server.Server.Handler = NewRouter(server, documentRoot)
+   server.Start()
 }
